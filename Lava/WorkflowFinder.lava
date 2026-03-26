@@ -1,11 +1,11 @@
 {% if PageParameter.workflowTypeId %}
 
-    <!-- get the guid of the workflowtype -->
+    {% comment %} get the guid of the workflowtype {% endcomment %}
     {% workflowtype id:'{{ PageParameter.workflowTypeId }}' %}
         {% assign workflowTypeGuid = workflowtype.Guid %}
     {% endworkflowtype %}
 
-    <!-- look up BlockType Ids from Guids for both WebForms and Obsidian Workflow Entry blocks -->
+    {% comment %} look up BlockType Ids from Guids for both WebForms and Obsidian Workflow Entry blocks {% endcomment %}
     {% blocktype where:'Guid == "a8bd05c8-6f89-4628-845b-059e686f089a"' %}
         {% assign webFormsBlockTypeId = blocktype.Id %}
     {% endblocktype %}
@@ -13,7 +13,7 @@
         {% assign obsidianBlockTypeId = blocktype.Id %}
     {% endblocktype %}
 
-    <!-- find all blocks that have a workflow entry block (WebForms or Obsidian) with this workflow selected -->
+    {% comment %} find all blocks that have a workflow entry block (WebForms or Obsidian) with this workflow selected {% endcomment %}
     {% assign allItems = '' | Split:'|' %}
 
     {% attribute where:'Name *= "Workflow Type" && EntityTypeQualifierValue == {{ webFormsBlockTypeId }}' %}
@@ -34,7 +34,7 @@
 
     {% assign itemSize = allItems | Size %}
 
-    <!-- make sure we have values before we show the alert -->
+    {% comment %} make sure we have values before we show the alert {% endcomment %}
     {% if itemSize > 0 %}
         <div class='alert alert-default'>
             This Workflow is currently being used via user entry on the following pages:<br/>
