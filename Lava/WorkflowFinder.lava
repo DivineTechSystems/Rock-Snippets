@@ -1,0 +1,53 @@
+{% if PageParameter.workflowTypeId %}
+
+    <!-- get the guid of the workflowtype -->
+    {% workflowtype id:'{{ PageParameter.workflowTypeId }}' %}
+        {% assign workflowTypeGuid = workflowtype.Guid %}
+    {% endworkflowtype %}
+
+    <!-- look up BlockType Ids from Guids for both WebForms and Obsidian Workflow Entry blocks -->
+    {% blocktype where:'Guid == "a8bd05c8-6f89-4628-845b-059e686f089a"' %}
+        {% assign webFormsBlockTypeId = blocktype.Id %}
+    {% endblocktype %}
+    {% blocktype where:'Guid == "9116aad8-cf16-4bce-b0cf-5b4d565710ed"' %}
+        {% assign obsidianBlockTypeId = blocktype.Id %}
+    {% endblocktype %}
+
+    <!-- find all blocks that have a workflow entry block (WebForms or Obsidian) with this workflow selected -->
+    {% assign allItems = '' | Split:'|' %}
+
+    {% attribute where:'Name *= "Workflow Type" && EntityTypeQualifierValue == {{ webFormsBlockTypeId }}' %}
+       {% attributevalue where:'AttributeId == {{ attribute.Id }} && Value *= "{{ workflowTypeGuid }}"' %}
+            {% for item in attributevalueItems %}
+                {% assign allItems = allItems | AddToArray:item %}
+            {% endfor %}
+       {% endattributevalue %}
+    {% endattribute %}
+
+    {% attribute where:'Name *= "Workflow Type" && EntityTypeQualifierValue == {{ obsidianBlockTypeId }}' %}
+       {% attributevalue where:'AttributeId == {{ attribute.Id }} && Value *= "{{ workflowTypeGuid }}"' %}
+            {% for item in attributevalueItems %}
+                {% assign allItems = allItems | AddToArray:item %}
+            {% endfor %}
+       {% endattributevalue %}
+    {% endattribute %}
+
+    {% assign itemSize = allItems | Size %}
+
+    <!-- make sure we have values before we show the alert -->
+    {% if itemSize > 0 %}
+        <div class='alert alert-default'>
+            This Workflow is currently being used via user entry on the following pages:<br/>
+            <ul>
+                <li>
+                {% for attributeValue in allItems %}
+                    {% block where:'Id == {{attributeValue.EntityId}}' %}
+                        <a href='{{ 'Global' | Attribute:'InternalApplicationRoot' }}/page/{{ block.Page.Id }}' target='_blank'>{{ block.Page.BrowserTitle }}</a>
+                    {% endblock %}
+                {% endfor %}
+              </li>
+            </ul>
+        </div>
+    {% endif %}
+
+{% endif %}
